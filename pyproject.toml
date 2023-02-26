@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "decorator-logging"
+authors = [
+    {name = "Alexander Gruhl", email = "gruhl.alexander@gmail.com"},
+]
+description = "Use it to decorate your function with logging and timing"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["logging", "loging_decorator", "decorator", "log", "timing"]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "decorator_logging.version"}
