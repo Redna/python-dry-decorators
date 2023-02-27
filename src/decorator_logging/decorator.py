@@ -1,41 +1,77 @@
+
+from enum import Enum, auto
 from functools import wraps
 import logging
 import time
 from typing import Callable
+from uuid import uuid4
 
 log = logging.getLogger(__name__)
 
 
-def logged(_func=None, level: int = logging.DEBUG):
-    def decorator(func):
+class benchmark_unit(Enum):
+    NANOSECONDS = auto()
+    MILLISECONDS = auto()
+    SECONDS = auto()
 
-        func_qual_name = func.__qualname__
-        func_arg_names = func.__code__.co_varnames[:func.__code__.co_argcount]
 
-        @wraps(func)
+def benchmark(_function=None, level: int = logging.DEBUG, unit=benchmark_unit.MILLISECONDS):
+    if unit == benchmark_unit.MILLISECONDS:
+        factor = 1e-6
+        unit_text = "ms"
+    elif unit == benchmark_unit.SECONDS:
+        factor = 1e-9
+        unit_text = "s"
+    else:
+        factor = 1
+        unit_text = "ns"
+
+    def decorator(function):
+        function_name = f"{function.__module__}.{function.__qualname__}"
+
+        @wraps(function)
         def wrapper(*args, **kwargs):
             start = time.perf_counter_ns()
+            try:
+                retval = function(*args, **kwargs)
+            finally:
+                benchmark_text = f"[{'benchmark':<10}] {function_name}: {(time.perf_counter_ns() - start)*factor:0.4f}{unit_text}"
+                log.log(level, benchmark_text)
+
+            return retval
+
+        return wrapper
+    return decorator(_function) if callable(_function) else decorator
+
+
+def logged(_function=None, level: int = logging.DEBUG):
+    def decorator(function):
+        function_name = f"{function.__module__}.{function.__qualname__}"
+        function_arg_names = function.__code__.co_varnames[:function.__code__.co_argcount]
+
+        @wraps(function)
+        def wrapper(*args, **kwargs):
 
             passed_args = [f"{name}={value}" for name,
-                           value in zip(func_arg_names, args)]
+                           value in zip(function_arg_names, args)]
             passed_kwargs = [f"{name}={value}" for name,
                              value in kwargs.items()]
 
             parameter_string = ", ".join(passed_args + passed_kwargs)
 
             log.log(
-                level, f"[{'entering'.center(8)}] {func_qual_name}({parameter_string})")
+                level, f"[{'entering':<10}] {function_name}({parameter_string})")
 
             try:
-                retval = func(*args, **kwargs)
+                retval = function(*args, **kwargs)
                 log.log(
-                    level, f"[{'leaving'.center(8)}] {func_qual_name} -> {retval} | {(time.perf_counter_ns() - start)*1e-6:0.2f}ms")
+                    level, f"[{'leaving':<10}] {function_name} -> {retval}")
             except Exception as e:
                 log.log(
-                    level, f"[{'leaving'.center(8)}] {func_qual_name} thrown [{repr(e)}] | {(time.perf_counter_ns() - start)*1e-6:0.2f}ms")
+                    level, f"[{'leaving':<10}] {function_name} thrown [{repr(e)}]")
                 raise
 
             return retval
 
         return wrapper
-    return decorator(_func) if callable(_func) else decorator
+    return decorator(_function) if callable(_function) else decorator

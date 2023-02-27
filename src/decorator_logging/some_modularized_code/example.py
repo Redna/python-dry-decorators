@@ -1,8 +1,9 @@
 import logging
 
-from decorator_logging.decorator import logged
+from decorator_logging.decorator import logged, benchmark, benchmark_unit
 
-@logged()
+@benchmark
+@logged
 def something(i):
     if i == 3: 
         raise RuntimeError("It is really something what I wanted to be thrown!")
@@ -10,8 +11,9 @@ def something(i):
     return i*i
 
 
+@benchmark(unit=benchmark_unit.SECONDS)
 @logged(level=logging.INFO)
-def another(prefix, call_count=0):
+def another(print_prefix, call_count=0):
     addition = 0
     for i in range(call_count):
         try:
