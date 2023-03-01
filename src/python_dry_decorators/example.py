@@ -1,6 +1,6 @@
 import logging
 
-from decorator_logging.decorator import logged, benchmark, benchmark_unit
+from python_dry_decorators.decorator import logged, benchmark, benchmark_unit
 
 @benchmark
 @logged

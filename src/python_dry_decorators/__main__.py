@@ -1,6 +1,6 @@
 import logging
 
-from decorator_logging.some_modularized_code.example import another
+from python_dry_decorators.example import another
 
 
 if __name__ == "__main__":

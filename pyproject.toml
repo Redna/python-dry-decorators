@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "decorator-logging"
+name = "python-dry-decorators"
 authors = [
     {name = "Alexander Gruhl", email = "gruhl.alexander@gmail.com"},
 ]
@@ -20,4 +20,4 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools.dynamic]
-version = {attr = "decorator_logging.version"}
+version = {attr = "python_dry_decorators.version"}
