@@ -1,6 +1,6 @@
 import logging
 
-from python_dry_decorators.example import another
+from python_dry_decorators.example import another, always_failing, finally_passing, runtime_error_failing
 
 
 if __name__ == "__main__":
@@ -11,3 +11,19 @@ if __name__ == "__main__":
     print("next one")
 
     print(f"finished {another(dict(demo= 5), call_count=3)}")
+
+
+    try:
+        always_failing()
+    except:
+        print("always failing fails always.. Wow")
+
+    try: 
+        runtime_error_failing()
+    except:
+        print("runtime_error_failing: That was excpected..")
+    
+    finally_passing()
+
+
+    print(always_failing())

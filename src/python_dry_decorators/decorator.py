@@ -75,3 +75,36 @@ def logged(_function=None, level: int = logging.DEBUG):
 
         return wrapper
     return decorator(_function) if callable(_function) else decorator
+
+
+def retryable(_func=None, exceptions=[Exception], no_of_retries=3, backoff_factor=0.6, max_backoff_seconds=5, level: int = logging.DEBUG):
+    def wrapper(func):
+        @wraps(func)
+        def func_with_retry(*args, **kwargs):
+            _delay = 0
+
+            for retry in range(no_of_retries):
+                time.sleep(_delay)
+
+                try:
+                    return func(*args, **kwargs)
+                except Exception as exception:
+                    if all(not isinstance(exception, expected_excpeption_class) for expected_excpeption_class in exceptions):
+                        log.log(
+                            level, f"Received {exception=}, will not retry { func.__name__}")
+                        raise
+
+                    log.log(level,
+                            f"{ func.__name__}! retry #{retry + 1} {no_of_retries=} {exception=}")
+
+                    if retry < no_of_retries-1:
+                        _delay += min((retry+1) * backoff_factor,
+                                      max_backoff_seconds)
+                        log.log(level, f"will retry in {_delay:0.2f} seconds")
+                    else:
+                        log.log(
+                            level, f"No more retries left. Last {exception=}")
+                        raise
+
+        return func_with_retry
+    return wrapper(_func) if callable(_func) else wrapper
